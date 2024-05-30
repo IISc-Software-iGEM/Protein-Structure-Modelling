@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <algorithm>
+#include "HeaderFiles/Hbond.h"
 using namespace std;
 
 pair<string, vector<int>> sequenceReader(const string &filePath) {
@@ -94,6 +95,10 @@ int main() {
 
         cout << "Hydrogen Bond given and write files >>>>>>> " << endl;
         cout << hbondFile << endl << hbondWriteFile << endl;
+
+        hbond_reader_me(hbondFile, hbondWriteFile);
+        numUplFiles += 1;
+        uplFilePaths.push_back(hbondWriteFile);
     }
     return 0;
 }

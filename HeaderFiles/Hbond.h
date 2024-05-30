@@ -2,6 +2,7 @@
 using namespace std;
 
 class HBondData {
+public:
     int value1;
     string str1;
     string str2;
@@ -44,6 +45,30 @@ void hbond_reader_me(const string& fileName, const string& writeFileName) {
     while(getline(infile, line)) {
         istringstream iss(line);
         HBondData data;
-        if()
+        
+        if(!(iss >> data.value1 >> data.str1 >> data.str2 >> data.value2 >> data.str3 >> data.str4 >> data.value3)) {
+
+        }
+
+        rawData.push_back(data);
     }
+
+    // closing the input file
+    infile.close();
+    
+
+    // opening the output files
+    ofstream outfile(writeFileName);
+    if(!outfile) {
+        throw runtime_error("Output file could not be opened");
+    }
+
+    // process and write the data to output file
+    for (const HBondData& data : rawData) {
+        outfile << data.value1 << " " << data.str1 << " " << data.str2 << '\t' << data.value2 << " " << data.str3 << " " << data.str4 << data.value3 << "\t\t#peak\t-1\n";
+    }
+
+    //closing the output file
+    outfile.close();
+
 }
