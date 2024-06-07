@@ -145,6 +145,9 @@ switch hydrogen_omission
         [wh_rand_X, wh_Comp, rand_X, Comp] = ibuildprot(seq,num,phi,psi,A);
 end
 
+%print rand_X
+fprintf(rand_X, wh_rand_X);
+
 if exist(ang_file, 'file')
     [ang_lo_cons, ang_up_cons] = ang_dist_conmaker(phi_cons,psi_cons,wh_Comp);
 end
