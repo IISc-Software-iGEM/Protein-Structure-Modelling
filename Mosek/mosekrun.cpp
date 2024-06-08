@@ -2,6 +2,7 @@
 #include <random>
 #include "fusion.h"
 
+using namespace std;
 using namespace mosek::fusion;
 using namespace monty;
 
@@ -22,6 +23,9 @@ int main() {
     //  Set Objective Function
     M->objective(ObjectiveSense::Minimize, traceX);
 
+    vector<int> theta = {1,2,3};
+    for(auto x : theta) cout << x << " ";
+    cout << endl;
     
 
 }
