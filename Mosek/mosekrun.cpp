@@ -6,7 +6,8 @@ using namespace mosek::fusion;
 using namespace monty;
 
 
-int main() { 
+int main() {
+    int n = 1;
     int dimension = 133;
     int numConstraints = 249;
     

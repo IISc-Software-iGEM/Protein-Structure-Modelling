@@ -20,4 +20,6 @@ int main() {
     for(const auto& X : EqualityBounds) {
         cout << X->x_i << " " << X->x_j << " " << X->bound << endl;
     }
+
+    
 }
