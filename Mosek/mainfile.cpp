@@ -8,8 +8,7 @@ using namespace monty;
 using namespace std;
 
 int main() {
-    int dimension = 6;
-    int numConstraints = 1;
+    int dimension = 133;
     
     string equalityBoundFile = "testfile.txt";
     vector < boundReader* > EqualityBounds = bound_reader(equalityBoundFile);
@@ -26,6 +25,7 @@ int main() {
     //  Set Objective Function
     M->objective(ObjectiveSense::Minimize, traceX);
     
+    // setting equality bounds
     for(int i = 0;i < n; i++) {
         boundReader* X = EqualityBounds[i];
 
@@ -46,6 +46,43 @@ int main() {
         shared_ptr<ndarray<double, 2>> A = new_array_ptr<double, 2>(shape(row,col));
         for(int i = 0;i < n; i++) { 
             for(int j = 0;j < n; j++) {
+                A->operator()(i, j) = answer[i][j];
+            }
+        }
+
+        auto EZ = Expr::mulDiag(A,XX);
+        auto traceEZ = Expr::sum(EZ);
+
+        M->constraint(traceEZ, Domain::equalsTo(X->bound));
+    }
+
+    // Setting upper bounds
+    string upperBoundsFile = "upBounds.txt";
+    vector < boundReader* > UpperBounds = bound_reader(upperBoundsFile);
+    int m = Y.size();
+
+    cout << "Total number of upper bounds are: " << m << endl;
+
+    for(int i = 0;i < m; i++) {
+        boundReader* Y = UpperBounds[i];
+
+        // create E
+        vector<vector< double >> E(1, vector<double>(dimension,0));
+        E[0][Y->x_i-1] = 1;
+        E[0][Y->x_j-1] = -1;
+
+        // E transpose
+        vector<vector <double> > ETranspose = transpose(E);
+
+        // matmul
+        vector<vector<double>> answer = matrixMult(ETranspose, E);
+
+        int row = answer.size();
+        int col = answer[0].size();
+
+        shared_ptr<ndarray<double, 2>> A = new_array_ptr<double, 2>(shape(row,col));
+        for(int i = 0;i < row; i++) { 
+            for(int j = 0;j < col; j++) {
                 A->operator()(i, j) = answer[i][j];
             }
         }
