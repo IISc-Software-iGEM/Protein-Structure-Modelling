@@ -10,7 +10,7 @@ using namespace std;
 int main() {
     int dimension = 133;
     
-    string equalityBoundFile = "testfile.txt";
+    string equalityBoundFile = "eqBounds.txt";
     vector < boundReader* > EqualityBounds = bound_reader(equalityBoundFile);
 
     int n = EqualityBounds.size();
@@ -44,8 +44,8 @@ int main() {
         int col = answer[0].size();
 
         shared_ptr<ndarray<double, 2>> A = new_array_ptr<double, 2>(shape(row,col));
-        for(int i = 0;i < n; i++) { 
-            for(int j = 0;j < n; j++) {
+        for(int i = 0;i < row; i++) { 
+            for(int j = 0;j < col; j++) {
                 A->operator()(i, j) = answer[i][j];
             }
         }
