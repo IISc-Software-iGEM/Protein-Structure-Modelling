@@ -100,5 +100,9 @@ int main() {
         numUplFiles += 1;
         uplFilePaths.push_back(hbondWriteFile);
     }
+
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::seconds>(end - timeStart);
+    cout << "Time taken to read input files: " << duration.count() << " seconds" << endl;
     return 0;
 }

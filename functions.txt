@@ -1,0 +1,9 @@
+1. seq_reader: code/inputreaders
+2. hbond_reader_me: code/inputreaders
+3. dist_reader: code/inputreaders
+4. ang_reader: code/inputreaders
+5. ang_sampler: code/helperfunctions
+6. ibuildprot: code/helperfunctions
+7. ang_dist_conmaker: code/sdpstuff
+8. reducer: code/sdpstuff
+9. upper_maker: code/sdpstuff
