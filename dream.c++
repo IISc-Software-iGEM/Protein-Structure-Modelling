@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <algorithm>
 #include "HeaderFiles/Hbond.h"
+#include "HeaderFiles/dist_reader.h"
 using namespace std;
 
 pair<vector<int>, vector<int>> sequenceReader(const string &filePath) {
@@ -122,6 +123,21 @@ int main() {
         numUplFiles += 1;
         uplFilePaths.push_back(hbondWriteFile);
     }
+
+    cout << "***************" << endl;
+    cout << "Updated UPL file paths >>>>>>> " << endl;
+    for(auto &file : uplFilePaths) {
+        cout << file << endl;
+    }
+
+    // Reading the UPL files
+    vector<vector< distanceConstraint* >> raw_up = readUplFiles(uplFilePaths);
+
+    // Printing the raw_up
+    cout << "***************" << endl;
+    cout << "Printing the raw_up >>>>>>> " << endl;
+    cout << raw_up.size() << endl;
+
 
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::seconds>(end - timeStart);
