@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include <algorithm>
-#include "HeaderFiles/Hbond.h"
-#include "HeaderFiles/dist_reader.h"
+#include "ConvertedFiles/inputreaders/Hbond.h"
+#include "ConvertedFiles/inputreaders/dist_reader.h"
 using namespace std;
 
 pair<vector<int>, vector<int>> sequenceReader(const string &filePath) {
@@ -145,7 +145,7 @@ int main() {
     //     }
     // }
 
-    
+
 
 
     auto end = chrono::high_resolution_clock::now();
