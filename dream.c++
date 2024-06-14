@@ -3,30 +3,36 @@
 #include "HeaderFiles/Hbond.h"
 using namespace std;
 
-pair<string, vector<int>> sequenceReader(const string &filePath) {
-    ifstream file(filePath);
-    if(!file.is_open()) {
-        cerr << "Unable to open file: " << filePath << endl;
-        return {"", {}};
-    }
+pair<vector<int>, vector<int>> sequenceReader(const string &filePath) {
+    // ifstream file(filePath);
+    // if(!file.is_open()) {
+    //     cerr << "Unable to open file: " << filePath << endl;
+    //     return {"", {}};
+    // }
 
-    string sequence;
-    vector<int> numberList;
-    string line;
+    // string sequence;
+    // vector<int> numberList;
+    // string line;
 
-    while(getline(file,line)) {
-        istringstream iss(line);
-        string word;
-        int number;
+    // while(getline(file,line)) {
+    //     istringstream iss(line);
+    //     string word;
+    //     int number;
 
-        while(iss >> word >> number) {
-            sequence += word;
-            sequence += " ";
-            numberList.push_back(number);
-        }
-    }
+    //     while(iss >> word >> number) {
+    //         sequence += word;
+    //         sequence += " ";
+    //         numberList.push_back(number);
+    //     }
+    // }
 
-    file.close();
+    // file.close();
+    // return {sequence,numberList};
+
+    vector<int> sequence = {18,3,6,5,12,7,3};
+    vector<int> numberList = {23,24,25,26,27,28,29};
+
+
     return {sequence,numberList};
 }
 
@@ -64,12 +70,28 @@ int main() {
     cout << "Reading input files ------- " << endl;
 
     string ProteinPath = proteinName + '/' + inSeqFile;
-    pair<string, vector<int>> result = sequenceReader(ProteinPath);
-    string sequence = result.first;
+    pair<vector<int>, vector<int>> result = sequenceReader(ProteinPath);
+    vector<int> sequence = result.first;
     vector <int> numberList = result.second;
+
+    // Printing the sequence
+    cout << "sequence = " << endl;
+    for(auto element : sequence) {
+        cout << element << " ";
+    }
+    cout << endl;
+
+    // Printing the number list
+    cout << "numberList = " << endl;
+    for(auto element : numberList) {
+        cout << element << " ";
+    }
+    cout << endl;
 
     inMaxRes = *max_element(numberList.begin(), numberList.end());
     inMinRes = *min_element(numberList.begin(), numberList.end());
+
+    cout << inMaxRes << " " << inMinRes << endl;
 
     // Number of Upl Files
     size_t numUplFiles = inUplFile.size(); 

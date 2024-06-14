@@ -65,7 +65,7 @@ void hbond_reader_me(const string& fileName, const string& writeFileName) {
 
     // process and write the data to output file
     for (const HBondData& data : rawData) {
-        outfile << data.value1 << " " << data.str1 << " " << data.str2 << '\t' << data.value2 << " " << data.str3 << " " << data.str4 << data.value3 << "\t\t#peak\t-1\n";
+        outfile << data.value1 << "  " << data.str1 << " " << data.str2 << "\t   " << data.value2 << " " << data.str3 << " " << data.str4 << "     " << data.value3 << "\t \t #peak  -1\n";
     }
 
     //closing the output file
