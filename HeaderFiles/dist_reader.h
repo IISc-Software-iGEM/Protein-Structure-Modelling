@@ -30,46 +30,6 @@ public:
     }
 };
 
-vector<vector< distanceConstraint* >> constructClassObject(vector<vector<string>> readedUplFiles) {
-    vector<vector< distanceConstraint* >> dconstraints;
-    for(auto readedFile : readedUplFiles) {
-
-        vector< distanceConstraint* > DCONSTRAINT(readedFile.size());
-        for(string x: readedFile) {
-
-            // variable initializations
-            int number1, number2;
-            string string1, string2, string3, string4;
-            float distance, peak;
-
-            // istringstream object to read the line
-            istringstream iss(x);
-
-            // reading the line
-            iss >> number1 >> string1 >> string2 >> number2 >> string3 >> string4 >> distance;
-
-            // check for peak value
-            if(iss) {
-                iss >> peak;
-            }
-            else {
-                peak = -1;
-            }
-
-            distanceConstraint* distBound = new distanceConstraint(number1, string1, string2, number2, string3, string4, distance, peak);
-
-            DCONSTRAINT.push_back(distBound);
-        }
-
-        dconstraints.push_back(DCONSTRAINT);
-    }
-    // auto X = dconstraints[0];
-    // for(auto x : X) {
-    //     cout << x->sres << " " << x->stype << " " << x->satom << " " << x->tres << " " << x->ttype << " " << x->tatom << " " << x->distance << " " << x->peak << endl;
-    // }
-    return dconstraints;
-}
-
 vector<vector< distanceConstraint* >> readUplFiles(const vector<string> uplFilePaths) {
     
     // check for upl files are received or not
@@ -115,12 +75,41 @@ vector<vector< distanceConstraint* >> readUplFiles(const vector<string> uplFileP
     }
 
     cout << "***************Lines are readed successfully***************" << endl;
-    //printing the readed lines 
-    // for(auto line : lines) {
-    //     for(auto l : line) {
-    //         cout << l << endl;
-    //     }
-    // }
 
-    return constructClassObject(lines);
+    vector<vector< distanceConstraint* >> distCons;
+
+    // printing the readed lines 
+    for(auto line : lines) {
+        vector< distanceConstraint* > one;
+        for(auto l : line) {
+            istringstream ss(l);
+            int num1, num2;
+            string type1, type2, atom1, atom2;
+            float distance, peak;
+            
+            int wordCount = 0;
+            istringstream temp(l);
+            string word;
+
+            while(temp >> word) {
+                wordCount++;
+            }
+
+            if(wordCount == 7) {
+                ss >> num1 >> type1 >> atom1 >> num2 >> type2 >> atom2 >> distance;
+                peak = 0;
+            }
+            else if(wordCount == 9) {
+                ss >> num1 >> type1 >> atom1 >> num2 >> type2 >> atom2 >> distance >> peak;
+                peak = -1;
+            }
+            
+            distanceConstraint* dc = new distanceConstraint(num1, type1, atom1, num2, type2, atom2, distance, peak);
+            one.push_back(dc);
+        }
+        distCons.push_back(one);
+    }
+
+    // printing the distance constraints
+    return distCons;
 }

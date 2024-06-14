@@ -136,7 +136,16 @@ int main() {
     // Printing the raw_up
     cout << "***************" << endl;
     cout << "Printing the raw_up >>>>>>> " << endl;
-    cout << raw_up.size() << endl;
+    cout << raw_up.size() << endl; // 74 struct and 2 struct.
+
+    // check for correct working
+    // for(auto up : raw_up) {
+    //     for(auto up2 : up) {
+    //         cout << up2 -> sres << " " << up2 -> stype << " " << up2 -> satom << " " << up2 -> tres << " " << up2 -> ttype << " " << up2 -> tatom << " " << up2 -> distance << " " << up2 -> peak << endl;
+    //     }
+    // }
+
+    
 
 
     auto end = chrono::high_resolution_clock::now();
