@@ -74,10 +74,10 @@ int main() {
 	auto cols = new_array_ptr<int, 1>( {int((X->x_i)-1), int((X->x_j)-1), int((X->x_j)-1), int((X->x_i)-1)} );
 	
 	auto values = new_array_ptr<double, 1>( {1.0,1.0,-1.0,-1.0} );
-	auto A = mosek::fusion::Matrix::sparse(dimension, dimension, rows, cols, values);
+	auto A_ij = mosek::fusion::Matrix::sparse(dimension, dimension, rows, cols, values);
         
 	
-        auto traceEZ = Expr::sum(Expr::mulDiag(A,XX));
+        auto traceEZ = Expr::sum(Expr::mulDiag(A_ij,XX));
 	cout << "matmul done for " << i << "th time" << endl;
         M->constraint(traceEZ, Domain::equalsTo(X->bound));
 	cout << i << "th equality constraint added" << endl;
