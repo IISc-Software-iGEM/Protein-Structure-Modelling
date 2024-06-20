@@ -52,9 +52,9 @@ int main() {
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
 
-    int dimension = 133;
+    int dimension = 1547;
     
-    string equalityBoundFile = "eqBounds.txt";
+    string equalityBoundFile = "2m4keqbounds.txt";
     vector < boundReader* > EqualityBounds = bound_reader(equalityBoundFile);
 
     int n = EqualityBounds.size();
@@ -70,8 +70,8 @@ int main() {
     for(int i = 0;i < n; i++) {
         boundReader* X = EqualityBounds[i];
 
-        auto rows = new_array_ptr<int, 1>( {int((X->x_i)-1), int((X->x_j)-1), int((X->x_i)-1), int((X->x_j)-1)} );
-	auto cols = new_array_ptr<int, 1>( {int((X->x_i)-1), int((X->x_j)-1), int((X->x_j)-1), int((X->x_i)-1)} );
+        auto rows = new_array_ptr<int, 1>( {int((X->x_i*1000)-1), int((X->x_j*1000)-1), int((X->x_i*1000)-1), int((X->x_j*1000)-1)} );
+	auto cols = new_array_ptr<int, 1>( {int((X->x_i*1000)-1), int((X->x_j*1000)-1), int((X->x_j*1000)-1), int((X->x_i*1000)-1)} );
 	
 	auto values = new_array_ptr<double, 1>( {1.0,1.0,-1.0,-1.0} );
 	auto A = mosek::fusion::Matrix::sparse(dimension, dimension, rows, cols, values);
@@ -79,12 +79,12 @@ int main() {
 	
         auto traceEZ = Expr::sum(Expr::mulDiag(A,XX));
 	cout << "matmul done for " << i << "th time" << endl;
-        M->constraint(traceEZ, Domain::equalsTo(X->bound));
+        M->constraint(traceEZ, Domain::equalsTo(X->bound*1000));
 	cout << i << "th equality constraint added" << endl;
     }
 
-    // Setting upper bounds
-    string upperBoundsFile = "upBounds.txt";
+    Setting upper bounds
+    string upperBoundsFile = "2m4kupbounds.txt";
     vector < boundReader* > UpperBounds = bound_reader(upperBoundsFile);
     int m = UpperBounds.size();
     Variable::t xi_1 = M->variable(m, Domain::greaterThan(0.0));
@@ -93,8 +93,8 @@ int main() {
     for(int i = 0;i < m; i++) {
         boundReader* Y = UpperBounds[i];
         
-        auto rows = new_array_ptr<int, 1>( {int((Y->x_i)-1), int((Y->x_j)-1), int((Y->x_i)-1), int((Y->x_j)-1)} );
-        auto cols = new_array_ptr<int, 1>( {int((Y->x_i)-1), int((Y->x_j)-1), int((Y->x_j)-1), int((Y->x_i)-1)} );
+        auto rows = new_array_ptr<int, 1>( {int((Y->x_i*1000)-1), int((Y->x_j*1000)-1), int((Y->x_i*1000)-1), int((Y->x_j*1000)-1)} );
+        auto cols = new_array_ptr<int, 1>( {int((Y->x_i*1000)-1), int((Y->x_j*1000)-1), int((Y->x_j*1000)-1), int((Y->x_i*1000)-1)} );
 
         auto values = new_array_ptr<double, 1>( {1.0,1.0,-1.0,-1.0} );
         auto A = mosek::fusion::Matrix::sparse(dimension, dimension, rows, cols, values);
@@ -102,21 +102,42 @@ int main() {
 	auto traceEZ = Expr::sum(Expr::mulDiag(A,XX));
 	cout << "matmul done for the " << i << "th time" << endl;
 
-        M->constraint(Expr::sub(traceEZ,xi_1->index(i)), Domain::lessThan(Y->bound));
+    M->constraint(Expr::sub(traceEZ,xi_1->index(i)), Domain::lessThan(Y->bound*1000));
 	cout << i << "th upperBound constraint added" << endl;
     }
 
+    string lowerBoundFile = "2m4klobounds.txt";
+    vector < boundReader* > LowerBounds = bound_reader(lowerBoundFile);
+    int o = LowerBounds.size();
+    cout << "Total Number of lower bounds are: " << o << endl;
+    Variable::t xi_2 = M->variable(o, Domain::greaterThan(0.0));
+    
+    for(int i = 0;i < o; i++) {
+       boundReader* Z = LowerBounds[i];
+
+        auto rows = new_array_ptr<int, 1>( {int((Z->x_i*1000)-1), int((Z->x_j*1000)-1), int((Z->x_i*1000)-1), int((Z->x_j*1000)-1)} );
+        auto cols = new_array_ptr<int, 1>( {int((Z->x_i*1000)-1), int((Z->x_j*1000)-1), int((Z->x_j*1000)-1), int((Z->x_i*1000)-1)} );
+
+        auto values = new_array_ptr<double, 1>( {1.0,1.0,-1.0,-1.0} );
+        auto A = mosek::fusion::Matrix::sparse(dimension, dimension, rows, cols, values);
+        
+        auto traceEZ = Expr::sum(Expr::mulDiag(A,XX));
+        M->constraint(Expr::add(traceEZ,xi_2->index(i)), Domain::greaterThan(Z->bound*1000));
+	   cout << i << "th lower bound constraint added" << endl;
+    }
+
+
     int wIJ = 300;
     int wIJdash = 300;
-
-    auto o2 = Expr::mul(1,xi_1->index(0));
-    for(int i = 1;i < m; i++) {
-        o2 = Expr::add(o2,Expr::mul(i+1,xi_1->index(i)));
-    }
     //  Set Objective Function
-    //M->objective(ObjectiveSense::Minimize, Expr::add(Expr::mul(10,traceX), Expr::add(Expr::mul(wIJ,Expr::sum(xi_1)), Expr::mul(wIJdash,Expr::sum(xi_2)))));
-    M->objective(ObjectiveSense::Minimize, Expr::add(Expr::mul(10,traceX),o2));
+    
+    M->objective(ObjectiveSense::Minimize, Expr::add(Expr::mul(0,traceX), Expr::add(Expr::mul(wIJ,Expr::sum(xi_1)), Expr::mul(wIJdash,Expr::sum(xi_2)))));
+    
+    //M->objective(ObjectiveSense::Minimize, Expr::add(Expr::mul(10,traceX),Expr::mul(wIJ,Expr::sum(xi_1))));
 
+    //M->objective(ObjectiveSense::Minimize, Expr::mul(10,traceX));
+
+    M->setLogHandler([ = ](const std::string & msg) { std::cout << msg << std::flush;} );
     M->solve();
     cout << "Solution : " << endl;
     
