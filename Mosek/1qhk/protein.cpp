@@ -52,13 +52,13 @@ int main() {
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
 
-    int dimension = 133;
+    int dimension = 16;
     
     string equalityBoundFile = "eqBounds.txt";
     vector < boundReader* > EqualityBounds = bound_reader(equalityBoundFile);
 
     int n = EqualityBounds.size();
-    cout << "Total number of equality bounds are: " << n << endl; 
+    cout << "Total number of equality bounds are: " << n << endl;  
 
     Model::t M = new Model("ayushRaina");
     auto _M = finally([&]() {M->dispose();});
@@ -82,6 +82,8 @@ int main() {
         M->constraint(traceEZ, Domain::equalsTo(X->bound));
 	cout << i << "th equality constraint added" << endl;
     }
+
+    
 
     // Setting upper bounds
     string upperBoundsFile = "upBounds.txt";
