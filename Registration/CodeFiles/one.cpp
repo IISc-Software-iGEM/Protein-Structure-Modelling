@@ -29,7 +29,23 @@ public:
     }
 };
 
+void displayCoordinates( CoordinateAndIndex* CAI) {
+    for(int i = 0;i < CAI->coordinates.size(); i++) {
+        cout << CAI->coordinates[i]->x << " " << CAI->coordinates[i]->y << " " << CAI->coordinates[i]->z << endl;
+    }
+}
 
+void displayIndexes( CoordinateAndIndex* CAI) {
+    for(int i = 0;i < CAI->indexes.size(); i++) {
+        cout << CAI->indexes[i] << " ";
+    }
+}
+
+void printPaths(vector<string> paths) {
+    for(auto path : paths) {
+        cout << path << endl;
+    }
+}
 
 int main() {
     vector<  CoordinateAndIndex *  > PatchContent;
@@ -47,17 +63,9 @@ int main() {
         indexPaths.push_back(indexPath);
     }
 
-    // print coordinate paths
-    cout << "Coordinate Paths" << endl;
-    for(auto path : coordinatePaths) {
-        cout << path << endl;
-    }
-
-    // print index paths
-    cout << "Index Paths" << endl;
-    for(auto path : indexPaths) {
-        cout << path << endl;
-    }
+    // uncomment these to print the paths
+    // printPaths(coordinatePaths);
+    // printPaths(indexPaths);
 
 
     // reading the coordinates and indexes
@@ -102,4 +110,10 @@ int main() {
         cout << "Number of Coordinates: " << PatchContent[i]->coordinates.size() << endl;
         cout << "Number of Indexes: " << PatchContent[i]->indexes.size() << endl;
     }
+
+    // uncomment to print the content of kth Patch
+    // int k = 3;
+    // displayCoordinates(PatchContent[k-1]);
+    // displayIndexes(PatchContent[k-1]);
+    
 }
