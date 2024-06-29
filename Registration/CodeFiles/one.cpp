@@ -47,26 +47,9 @@ void printPaths(vector<string> paths) {
     }
 }
 
-int main() {
-    vector<  CoordinateAndIndex *  > PatchContent;
-    int numPatches = 8;
-
-    vector<string> coordinatePaths;
-    for(int i = 0;i < numPatches; i++) {
-        string coordPath = "../Groups/group" + to_string(i+1) + ".txt";
-        coordinatePaths.push_back(coordPath);
-    }
-
-    vector<string> indexPaths;
-    for(int i = 0;i < numPatches; i++) {
-        string indexPath = "../Indexes/index" + to_string(i+1) + ".txt";
-        indexPaths.push_back(indexPath);
-    }
-
-    // uncomment these to print the paths
-    // printPaths(coordinatePaths);
-    // printPaths(indexPaths);
-
+vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinatePaths, const vector<string> indexPaths) {
+    vector< CoordinateAndIndex* > PatchContent;
+    int numPatches = coordinatePaths.size();
 
     // reading the coordinates and indexes
     for(int i = 0;i < numPatches; i++) {
@@ -115,5 +98,23 @@ int main() {
     // int k = 3;
     // displayCoordinates(PatchContent[k-1]);
     // displayIndexes(PatchContent[k-1]);
-    
+    return PatchContent;
+}
+
+int main() {
+
+    vector<string> coordinatePaths;
+    for(int i = 0;i < 8; i++) {
+        string coordPath = "../Groups/group" + to_string(i+1) + ".txt";
+        coordinatePaths.push_back(coordPath);
+    }
+
+    vector<string> indexPaths;
+    for(int i = 0;i < 8; i++) {
+        string indexPath = "../Indexes/index" + to_string(i+1) + ".txt";
+        indexPaths.push_back(indexPath);
+    }
+
+    vector< CoordinateAndIndex* > PatchContent = constructTheStruct(coordinatePaths, indexPaths);
+
 }
