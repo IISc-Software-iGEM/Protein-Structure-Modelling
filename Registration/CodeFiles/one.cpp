@@ -101,7 +101,75 @@ vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinate
     return PatchContent;
 }
 
+vector<int> mapToTmpIndex(const vector <int> globalIndex, const vector<int> atom_mapVector) {
+    int n_atom = globalIndex.size();
+    cout << n_atom << endl;
+    vector<int> tmpIndex(n_atom,0);
+
+    for(int i = 0;i < n_atom; i++) {
+        int index = globalIndex[i];
+        
+        auto forwardIterator = find(atom_mapVector.begin(), atom_mapVector.end(), index);
+        
+        if(forwardIterator != atom_mapVector.end()) {
+            tmpIndex[i] = distance(atom_mapVector.begin(), forwardIterator) + 1;
+        }
+        else {
+            cout << "Error in mapping the indexes" << endl;
+        }
+    }
+
+    return tmpIndex;
+}
+
+vector < CoordinateAndIndex* > doRegForGroup(const vector<int> groupNums, const vector < CoordinateAndIndex* > CAI) {
+    
+    if(groupNums.size() != CAI.size()) {
+        cout << "Number of groups and patches are not equal" << endl;
+        exit(0);
+    }
+    else {
+        cout << "Number of groups and patches are equal" << endl;
+    }
+
+    set<int> atom_map;
+    for(int i = 0;i < groupNums.size(); i++) {
+        vector<int> Indexes = CAI[i]->indexes;   
+        for(int j = 0;j < Indexes.size(); j++) {
+            atom_map.insert(Indexes[j]);
+        }
+    }
+
+    // convert set into a vector
+    vector<int> atom_mapVector(atom_map.begin(), atom_map.end());
+    atom_map.clear();
+
+    // Uncomment to print the contents of atom_mapVector
+    // for(auto x : atom_mapVector) {
+    //     cout << x << " ";
+    // }
+    // cout << endl;
+    // cout << "Unique Elements: " << atom_mapVector.size() << endl;
+    
+    // mapping the global indexes to temporary indexes
+    // auto mappedIndex = mapToTmpIndex(CAI[5]->indexes, atom_mapVector);
+    // cout << mappedIndex.size() << endl;
+    
+
+    // Map to TMP index for all the patches
+    for(int i = 0;i < CAI.size(); i++) {
+        CAI[i]->indexes = mapToTmpIndex(CAI[i]->indexes, atom_mapVector);
+    }
+
+    return CAI;
+}
+
+void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension) {
+    return;
+}
+
 int main() {
+    int dimension = 3;
 
     vector<string> coordinatePaths;
     for(int i = 0;i < 8; i++) {
@@ -114,7 +182,14 @@ int main() {
         string indexPath = "../Indexes/index" + to_string(i+1) + ".txt";
         indexPaths.push_back(indexPath);
     }
-
+    
+    // construct the struct
     vector< CoordinateAndIndex* > PatchContent = constructTheStruct(coordinatePaths, indexPaths);
+    vector<int> groupNums = {1,2,3,4,6,7,42,63};
 
+    // map to temp index
+    PatchContent = doRegForGroup(groupNums, PatchContent);
+
+    // call the Global Registration module
+    doGretSDP(PatchContent, dimension);
 }
