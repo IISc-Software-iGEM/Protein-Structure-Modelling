@@ -103,7 +103,6 @@ vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinate
 
 vector<int> mapToTmpIndex(const vector <int> globalIndex, const vector<int> atom_mapVector) {
     int n_atom = globalIndex.size();
-    cout << n_atom << endl;
     vector<int> tmpIndex(n_atom,0);
 
     for(int i = 0;i < n_atom; i++) {
@@ -122,7 +121,7 @@ vector<int> mapToTmpIndex(const vector <int> globalIndex, const vector<int> atom
     return tmpIndex;
 }
 
-vector < CoordinateAndIndex* > doRegForGroup(const vector<int> groupNums, const vector < CoordinateAndIndex* > CAI) {
+pair <vector < CoordinateAndIndex* >, int> doRegForGroup(const vector<int> groupNums, const vector < CoordinateAndIndex* > CAI) {
     
     if(groupNums.size() != CAI.size()) {
         cout << "Number of groups and patches are not equal" << endl;
@@ -149,7 +148,7 @@ vector < CoordinateAndIndex* > doRegForGroup(const vector<int> groupNums, const 
     //     cout << x << " ";
     // }
     // cout << endl;
-    // cout << "Unique Elements: " << atom_mapVector.size() << endl;
+    cout << "Unique Elements: " << atom_mapVector.size() << endl;
     
     // mapping the global indexes to temporary indexes
     // auto mappedIndex = mapToTmpIndex(CAI[5]->indexes, atom_mapVector);
@@ -161,10 +160,38 @@ vector < CoordinateAndIndex* > doRegForGroup(const vector<int> groupNums, const 
         CAI[i]->indexes = mapToTmpIndex(CAI[i]->indexes, atom_mapVector);
     }
 
-    return CAI;
+    return {CAI, atom_mapVector.size()};
 }
 
-void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension) {
+void formBL(vector< CoordinateAndIndex* > CAI, int dimension, int uniqueIndex) {
+    
+    int m = CAI.size();
+    int Md = m*dimension;
+
+    vector<vector<double>> bTemp(uniqueIndex+m, vector<double>(dimension, 0));
+    cout << "Rows: " << uniqueIndex+m << " Columns: " << dimension << endl;
+
+    vector< Point* > Coordinates = CAI[1]->coordinates;
+    vector<int> Indexes = CAI[1]->indexes;
+
+    for(int i = 0;i < Indexes.size(); i++) {
+        bTemp[Indexes[i]-1][0] = Coordinates[i]->x;
+        bTemp[Indexes[i]-1][1] = Coordinates[i]->y;
+        bTemp[Indexes[i]-1][2] = Coordinates[i]->z;
+    }
+
+    for(auto row : bTemp) {
+        for(auto x : row) {
+            cout << x << " ";
+        }
+        cout << endl;
+    }
+
+    return;
+}
+
+void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueIndexes) {
+    formBL(CAI, dimension, uniqueIndexes);
     return;
 }
 
@@ -188,8 +215,10 @@ int main() {
     vector<int> groupNums = {1,2,3,4,6,7,42,63};
 
     // map to temp index
-    PatchContent = doRegForGroup(groupNums, PatchContent);
+    auto result = doRegForGroup(groupNums, PatchContent);
+    PatchContent = result.first;
+    int uniqueIndexes = result.second;
 
     // call the Global Registration module
-    doGretSDP(PatchContent, dimension);
+    doGretSDP(PatchContent, dimension, uniqueIndexes);
 }
