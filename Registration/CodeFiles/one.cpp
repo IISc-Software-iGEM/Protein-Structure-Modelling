@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "../../Mosek/matrixoperations.h"
 using namespace std;
 
 class Point {
@@ -163,35 +164,68 @@ pair <vector < CoordinateAndIndex* >, int> doRegForGroup(const vector<int> group
     return {CAI, atom_mapVector.size()};
 }
 
-void formBL(vector< CoordinateAndIndex* > CAI, int dimension, int uniqueIndex) {
+vector<vector<double>> formB_matrix(vector< CoordinateAndIndex* > CAI, int dimension, int uniqueIndex) {
     
     int m = CAI.size();
     int Md = m*dimension;
+    
+    // initialize B matrix with 0 
+    vector<vector<double>> B(uniqueIndex+m, vector<double>(Md, 0));
 
-    vector<vector<double>> bTemp(uniqueIndex+m, vector<double>(dimension, 0));
-    cout << "Rows: " << uniqueIndex+m << " Columns: " << dimension << endl;
+    for(int i = 0;i < m;i++) {
+        vector < Point* > Coordinates = CAI[i]->coordinates;
+        vector < int > Indexes = CAI[i]->indexes;
 
-    vector< Point* > Coordinates = CAI[1]->coordinates;
-    vector<int> Indexes = CAI[1]->indexes;
-
-    for(int i = 0;i < Indexes.size(); i++) {
-        bTemp[Indexes[i]-1][0] = Coordinates[i]->x;
-        bTemp[Indexes[i]-1][1] = Coordinates[i]->y;
-        bTemp[Indexes[i]-1][2] = Coordinates[i]->z;
-    }
-
-    for(auto row : bTemp) {
-        for(auto x : row) {
-            cout << x << " ";
+        for(int j = 0;j < Indexes.size(); j++) {
+            B[Indexes[j]-1][i*dimension] = Coordinates[j]->x;
+            B[Indexes[j]-1][i*dimension+1] = Coordinates[j]->y;
+            B[Indexes[j]-1][i*dimension+2] = Coordinates[j]->z;
         }
-        cout << endl;
     }
 
-    return;
+    return transpose(B);
+}
+
+pair < vector<vector<double>>, vector<vector<double>> > form_L_and_Adj_matrix(vector< CoordinateAndIndex* > CAI, int dimension, int uniqueIndex) {
+    
+    int m = CAI.size();
+
+    // initialize L and ADJ matrix with 0
+    vector<vector<double>> L(uniqueIndex+m, vector<double>(uniqueIndex+m,0));
+    vector<vector<double>> Adj(uniqueIndex+m, vector<double>(uniqueIndex+m, 0));
+
+    for(int i = 0;i < m; i++) {
+        vector< int > Indexes = CAI[i]->indexes;
+
+        for(int j = 0;j < Indexes.size(); j++) {
+            int currIndex = Indexes[j];
+
+            // filling L matrix
+            L[currIndex-1][currIndex-1] += 1;
+            L[uniqueIndex+i][uniqueIndex+i] += 1;
+            L[currIndex-1][uniqueIndex+i] += -1;
+            L[uniqueIndex+i][currIndex-1] += -1;
+
+            // filling Adj matrix
+            Adj[currIndex-1][uniqueIndex+i] = 1;
+            Adj[uniqueIndex+i][currIndex-1] = 1;
+        }
+
+    }
+    return {L, Adj};
 }
 
 void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueIndexes) {
-    formBL(CAI, dimension, uniqueIndexes);
+    vector<vector<double>> B = formB_matrix(CAI, dimension, uniqueIndexes);
+    cout << "B Matrix is formed" << endl;
+    cout << "Rows: " << B.size() << " and Columns: " << B[0].size() << endl;
+
+    auto pairBL = form_L_and_Adj_matrix(CAI, dimension, uniqueIndexes);
+    vector<vector<double>> L = pairBL.first;
+    vector<vector<double>> Adj = pairBL.second;
+
+    cout << "L and Adj Matrix is formed" << endl;
+    
     return;
 }
 
