@@ -1,6 +1,10 @@
 #include <bits/stdc++.h>
 #include "../../Mosek/matrixoperations.h"
+#include "../../../eigen-3.4.0/Eigen/Dense"
+
 using namespace std;
+using namespace Eigen;
+
 
 class Point {
 public:
@@ -215,6 +219,49 @@ pair < vector<vector<double>>, vector<vector<double>> > form_L_and_Adj_matrix(ve
     return {L, Adj};
 }
 
+MatrixXd convertToEigenMatrix(vector<vector<double>> matrix) {
+
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+
+    MatrixXd M(rows, cols);
+    for(int i = 0;i < rows; i++) {
+        for(int j = 0;j < cols; j++) {
+            M(i,j) = matrix[i][j];
+        }
+    }
+
+    return M;
+}
+
+MatrixXd computePseudoinverse(const MatrixXd &matrix) {
+    // Compute the SVD of the input matrix
+    JacobiSVD<MatrixXd> svd(matrix, ComputeThinU | ComputeThinV);
+    
+    // Get the singular values and the U, V matrices
+    const VectorXd &singularValues = svd.singularValues();
+    const MatrixXd &U = svd.matrixU();
+    const MatrixXd &V = svd.matrixV();
+
+    // Create a diagonal matrix for the inverse of singular values
+    VectorXd singularValuesInv(singularValues.size());
+    for (int i = 0; i < singularValues.size(); ++i) {
+        if (singularValues(i) > 1e-10) {  // Use a threshold to avoid division by zero
+            singularValuesInv(i) = 1.0 / singularValues(i);
+        } else {
+            singularValuesInv(i) = 0;
+        }
+    }
+
+    // Compute the pseudoinverse using the SVD components
+    MatrixXd pseudoinverse = V * singularValuesInv.asDiagonal() * U.transpose();
+    return pseudoinverse;
+}
+
+bool isSymmetric(const MatrixXd &matrix) {
+    return matrix.isApprox(matrix.transpose());
+}
+
 void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueIndexes) {
     vector<vector<double>> B = formB_matrix(CAI, dimension, uniqueIndexes);
     cout << "B Matrix is formed" << endl;
@@ -226,6 +273,35 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
 
     cout << "L and Adj Matrix is formed" << endl;
     
+    // converting B, L and Adj matrix to Eigen Matrix
+    MatrixXd B_eigen = convertToEigenMatrix(B);
+    MatrixXd L_eigen = convertToEigenMatrix(L);
+    MatrixXd Adj_eigen = convertToEigenMatrix(Adj);
+
+    cout << "Matrices converted to Eigen Matrices successfully " << endl;
+    cout << "Dimensions of B: " << B_eigen.rows() << " " << B_eigen.cols() << endl;
+    cout << "Dimensions of L: " << L_eigen.rows() << " " << L_eigen.cols() << endl;
+    cout << "Dimensions of Adj: " << Adj_eigen.rows() << " " << Adj_eigen.cols() << endl;
+
+
+    MatrixXd B_Ldiag_BT = B_eigen * computePseudoinverse(L_eigen) * B_eigen.transpose();
+    
+    // print first ith row of B_Ldiag_BT
+    cout << "B_Ldiag_BT is computed successfully" << endl;
+    cout << "Dimensions of B_Ldiag_BT: " << B_Ldiag_BT.rows() << " " << B_Ldiag_BT.cols() << endl;
+
+    // check is matrix formed is symmetric or not
+    if(!isSymmetric(B_Ldiag_BT)) {
+        cout << "Matrix is not symmetric" << endl;
+        cout << "Making the matrix symmetric" << endl;
+        B_Ldiag_BT = 0.5 * (B_Ldiag_BT + B_Ldiag_BT.transpose());
+    }
+
+    // for(int i = 0;i < 24; i++) {
+    //     cout << "Col " << i+1 << " --> " << B_Ldiag_BT(9,i) << endl;
+    // }
+    cout << endl;
+
     return;
 }
 
