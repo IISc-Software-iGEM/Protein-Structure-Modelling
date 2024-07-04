@@ -246,7 +246,7 @@ MatrixXd computePseudoinverse(const MatrixXd &matrix) {
     // Create a diagonal matrix for the inverse of singular values
     VectorXd singularValuesInv(singularValues.size());
     for (int i = 0; i < singularValues.size(); ++i) {
-        if (singularValues(i) > 1e-10) {  // Use a threshold to avoid division by zero
+        if (singularValues(i) > 1e-6) {  // Use a threshold to avoid division by zero
             singularValuesInv(i) = 1.0 / singularValues(i);
         } else {
             singularValuesInv(i) = 0;
@@ -260,6 +260,17 @@ MatrixXd computePseudoinverse(const MatrixXd &matrix) {
 
 bool isSymmetric(const MatrixXd &matrix) {
     return matrix.isApprox(matrix.transpose());
+}
+
+void saveMatrix(const MatrixXd& matrix, const std::string& filename) {
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << matrix.rows() << " " << matrix.cols() << "\n";
+        file << matrix << "\n";
+        file.close();
+    } else {
+        std::cerr << "Unable to open file for writing: " << filename << std::endl;
+    }
 }
 
 void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueIndexes) {
@@ -278,6 +289,9 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
     MatrixXd L_eigen = convertToEigenMatrix(L);
     MatrixXd Adj_eigen = convertToEigenMatrix(Adj);
 
+    saveMatrix(L_eigen, "L_eigen.txt");
+    saveMatrix(B_eigen, "B_eigen.txt");
+    
     cout << "Matrices converted to Eigen Matrices successfully " << endl;
     cout << "Dimensions of B: " << B_eigen.rows() << " " << B_eigen.cols() << endl;
     cout << "Dimensions of L: " << L_eigen.rows() << " " << L_eigen.cols() << endl;
@@ -300,6 +314,15 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
     // for(int i = 0;i < 24; i++) {
     //     cout << "Col " << i+1 << " --> " << B_Ldiag_BT(9,i) << endl;
     // }
+
+    std::ofstream file("objectiveMatrix.txt");
+    if (file.is_open()) {
+        file << B_Ldiag_BT.rows() << " " << B_Ldiag_BT.cols() << "\n";
+        file << B_Ldiag_BT << "\n";
+        file.close();
+    } else {
+        std::cerr << "Unable to open file for writing: " << "objectiveMatrix.txt" << std::endl;
+    }
     cout << endl;
 
     return;
