@@ -28,6 +28,8 @@ MatrixXd loadMatrix(const std::string& filename) {
 }
 
 int main() {
+
+    auto start = chrono::high_resolution_clock::now();
     // Define file paths and dimensions
     string filename_B = "B_eigen.txt";
     string filename_L = "L_eigen.txt";
@@ -61,5 +63,8 @@ int main() {
         cout << x_cord.col(i).transpose() << endl;
     }
 
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
     return 0;
 }

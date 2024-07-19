@@ -67,6 +67,7 @@ vector<MatrixXd> extractRotations(const MatrixXd& W, int dim, int num_patch) {
 }
 
 int main() {
+    auto start = chrono::high_resolution_clock::now();
     string filename = "matrix.txt";
     
     // Load the matrix from the file
@@ -120,6 +121,9 @@ int main() {
         R.block(0, dim * i, dim, dim) = rotations[i];
     }
     cout << R << endl;
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
     saveMatrix(R, "rotations.txt");
     return 0;
 }

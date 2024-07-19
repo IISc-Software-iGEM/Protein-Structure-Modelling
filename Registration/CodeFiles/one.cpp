@@ -52,6 +52,15 @@ void printPaths(vector<string> paths) {
     }
 }
 
+void timeDisplay(chrono::high_resolution_clock::time_point startTime, chrono::high_resolution_clock::time_point endTime, string message, int i) {
+    cout << "Time Display " << i << ": " << endl;
+    cout << "Time taken for " << message << ": " << chrono::duration_cast<chrono::microseconds>(endTime-startTime).count() << " microseconds" << endl;
+}
+
+void totalDisplay(chrono::high_resolution_clock::time_point startTime, chrono::high_resolution_clock::time_point endTime) {
+    cout << "Total Time: " << chrono::duration_cast<chrono::microseconds>(endTime-startTime).count() << " microseconds" << endl;
+}
+
 vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinatePaths, const vector<string> indexPaths) {
     vector< CoordinateAndIndex* > PatchContent;
     int numPatches = coordinatePaths.size();
@@ -64,11 +73,11 @@ vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinate
         ifstream indexFile(indexPaths[i]);
 
         if(!coordFile.is_open() or !indexFile.is_open()) {
-            cout << "Error in opening the file" << endl;
+            // cout << "Error in opening the file" << endl;
             exit(0);
         }
         else {
-            cout << "Files are opened successfully" << endl;
+            // cout << "Files are opened successfully" << endl;
             CAI = new CoordinateAndIndex();
 
             string line;
@@ -93,11 +102,11 @@ vector< CoordinateAndIndex* > constructTheStruct(const vector<string> coordinate
     }
 
     // printing the readed coordinates and indexes
-    for(int i = 0;i < numPatches; i++) {
-        cout << i+1 << "th Patch" << endl;
-        cout << "Number of Coordinates: " << PatchContent[i]->coordinates.size() << endl;
-        cout << "Number of Indexes: " << PatchContent[i]->indexes.size() << endl;
-    }
+    // for(int i = 0;i < numPatches; i++) {
+    //     cout << i+1 << "th Patch" << endl;
+    //     cout << "Number of Coordinates: " << PatchContent[i]->coordinates.size() << endl;
+    //     cout << "Number of Indexes: " << PatchContent[i]->indexes.size() << endl;
+    // }
 
     // uncomment to print the content of kth Patch
     // int k = 3;
@@ -255,6 +264,8 @@ MatrixXd computePseudoinverse(const MatrixXd &matrix) {
 
     // Compute the pseudoinverse using the SVD components
     MatrixXd pseudoinverse = V * singularValuesInv.asDiagonal() * U.transpose();
+
+    auto endTime2 = chrono::high_resolution_clock::now();
     return pseudoinverse;
 }
 
@@ -274,35 +285,56 @@ void saveMatrix(const MatrixXd& matrix, const std::string& filename) {
 }
 
 void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueIndexes) {
+
+    auto startTime = chrono::high_resolution_clock::now();
     vector<vector<double>> B = formB_matrix(CAI, dimension, uniqueIndexes);
     cout << "B Matrix is formed" << endl;
     cout << "Rows: " << B.size() << " and Columns: " << B[0].size() << endl;
-
+    
+    
     auto pairBL = form_L_and_Adj_matrix(CAI, dimension, uniqueIndexes);
     vector<vector<double>> L = pairBL.first;
     vector<vector<double>> Adj = pairBL.second;
 
-    cout << "L and Adj Matrix is formed" << endl;
+    auto endTime2 = chrono::high_resolution_clock::now();
+    timeDisplay(startTime, endTime2, "forming B, L and Adj matrix", 2);
+    // cout << "L and Adj Matrix is formed" << endl;
     
-    // converting B, L and Adj matrix to Eigen Matrix
+    // // converting B, L and Adj matrix to Eigen Matrix
     MatrixXd B_eigen = convertToEigenMatrix(B);
     MatrixXd L_eigen = convertToEigenMatrix(L);
     MatrixXd Adj_eigen = convertToEigenMatrix(Adj);
 
+    auto endTime3 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime2, endTime3, "converting to Eigen Matrix", 3);
+
     saveMatrix(L_eigen, "L_eigen.txt");
     saveMatrix(B_eigen, "B_eigen.txt");
+
+    auto endTime4 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime3, endTime4, "saving the Eigen Matrix", 4);
     
     cout << "Matrices converted to Eigen Matrices successfully " << endl;
     cout << "Dimensions of B: " << B_eigen.rows() << " " << B_eigen.cols() << endl;
     cout << "Dimensions of L: " << L_eigen.rows() << " " << L_eigen.cols() << endl;
     cout << "Dimensions of Adj: " << Adj_eigen.rows() << " " << Adj_eigen.cols() << endl;
 
+    auto endTime5 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime4, endTime5, "displaying the dimensions of Eigen Matrix", 5);
 
-    MatrixXd B_Ldiag_BT = B_eigen * computePseudoinverse(L_eigen) * B_eigen.transpose();
-    
-    // print first ith row of B_Ldiag_BT
-    cout << "B_Ldiag_BT is computed successfully" << endl;
-    cout << "Dimensions of B_Ldiag_BT: " << B_Ldiag_BT.rows() << " " << B_Ldiag_BT.cols() << endl;
+    // computing the pseudoinverse of L
+    MatrixXd L_pseudo = computePseudoinverse(L_eigen);
+
+    auto endTime6 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime5, endTime6, "computing the pseudoinverse of L", 6);
+
+    MatrixXd B_Ldiag_BT = B_eigen * L_pseudo * B_eigen.transpose();
+    auto endTime7 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime6, endTime7, "computing B_Ldiag_BT", 7);
+
+    // // print first ith row of B_Ldiag_BT
+    // cout << "B_Ldiag_BT is computed successfully" << endl;
+    // cout << "Dimensions of B_Ldiag_BT: " << B_Ldiag_BT.rows() << " " << B_Ldiag_BT.cols() << endl;
 
     // check is matrix formed is symmetric or not
     if(!isSymmetric(B_Ldiag_BT)) {
@@ -311,9 +343,9 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
         B_Ldiag_BT = 0.5 * (B_Ldiag_BT + B_Ldiag_BT.transpose());
     }
 
-    // for(int i = 0;i < 24; i++) {
-    //     cout << "Col " << i+1 << " --> " << B_Ldiag_BT(9,i) << endl;
-    // }
+    // // for(int i = 0;i < 24; i++) {
+    // //     cout << "Col " << i+1 << " --> " << B_Ldiag_BT(9,i) << endl;
+    // // }
 
     std::ofstream file("objectiveMatrix.txt");
     if (file.is_open()) {
@@ -325,11 +357,17 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
     }
     cout << endl;
 
+    auto endTime8 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime7, endTime8, "saving the objective matrix", 8);
+
     return;
 }
 
 int main() {
     int dimension = 3;
+
+
+    auto startTime = chrono::high_resolution_clock::now();
 
     vector<string> coordinatePaths;
     for(int i = 0;i < 8; i++) {
@@ -343,8 +381,19 @@ int main() {
         indexPaths.push_back(indexPath);
     }
     
+    
+    auto endTime1 = chrono::high_resolution_clock::now();
+    timeDisplay(startTime, endTime1, "writing input file paths", 1);
+    totalDisplay(startTime, endTime1);
+
     // construct the struct
     vector< CoordinateAndIndex* > PatchContent = constructTheStruct(coordinatePaths, indexPaths);
+    
+     
+    auto endTime2 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime1, endTime2, "reading the files and constructing the struct", 2);
+    totalDisplay(startTime, endTime2);
+
     vector<int> groupNums = {1,2,3,4,6,7,42,63};
 
     // map to temp index
@@ -352,6 +401,14 @@ int main() {
     PatchContent = result.first;
     int uniqueIndexes = result.second;
 
+    auto endTime3 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime2, endTime3, "mapping to temporary index", 3);
+    totalDisplay(startTime, endTime3);
+
     // call the Global Registration module
     doGretSDP(PatchContent, dimension, uniqueIndexes);
+
+    auto endTime4 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime3, endTime4, "Global Registration", 4);
+    totalDisplay(startTime, endTime4);
 }
