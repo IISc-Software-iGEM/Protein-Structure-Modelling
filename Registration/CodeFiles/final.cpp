@@ -27,6 +27,17 @@ MatrixXd loadMatrix(const std::string& filename) {
     return matrix;
 }
 
+void saveMatrix(const MatrixXd& matrix, const std::string& filename) {
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << matrix.rows() << " " << matrix.cols() << "\n";
+        file << matrix << "\n";
+        file.close();
+    } else {
+        std::cerr << "Unable to open file for writing: " << filename << std::endl;
+    }
+}
+
 int main() {
 
     auto start = chrono::high_resolution_clock::now();
@@ -62,6 +73,9 @@ int main() {
     for (int i = 0; i < x_cord.cols(); ++i) {
         cout << x_cord.col(i).transpose() << endl;
     }
+
+    // Save the x_cord
+    saveMatrix(x_cord, "x_cord.txt");
 
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);

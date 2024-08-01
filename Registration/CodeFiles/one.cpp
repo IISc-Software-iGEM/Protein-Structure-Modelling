@@ -342,6 +342,8 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
         cout << "Making the matrix symmetric" << endl;
         B_Ldiag_BT = 0.5 * (B_Ldiag_BT + B_Ldiag_BT.transpose());
     }
+    auto endTime8 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime7, endTime8, "checking the symmetry of B_Ldiag_BT", 8);
 
     // // for(int i = 0;i < 24; i++) {
     // //     cout << "Col " << i+1 << " --> " << B_Ldiag_BT(9,i) << endl;
@@ -357,8 +359,8 @@ void doGretSDP(vector < CoordinateAndIndex* > CAI, int dimension, int uniqueInde
     }
     cout << endl;
 
-    auto endTime8 = chrono::high_resolution_clock::now();
-    timeDisplay(endTime7, endTime8, "saving the objective matrix", 8);
+    auto endTime9 = chrono::high_resolution_clock::now();
+    timeDisplay(endTime8, endTime9, "saving the objective matrix", 8);
 
     return;
 }

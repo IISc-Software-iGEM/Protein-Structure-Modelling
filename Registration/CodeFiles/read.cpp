@@ -105,11 +105,18 @@ int main() {
     MatrixXd sqrt_S_diag = S_diag.cwiseSqrt();
     MatrixXd W = sqrt_S_diag * V.transpose();
 
+    auto endTime1 = chrono::high_resolution_clock::now();
+    auto duration1 = chrono::duration_cast<chrono::microseconds>(endTime1 - start);
+    cout << "Time taken for Eigen Decomposition: " << duration1.count() << " microseconds" << endl;
     cout << W << endl;
 
     // Extract rotations
     vector<MatrixXd> rotations = extractRotations(W, dim, num_patch);
 
+    auto endTime2 = chrono::high_resolution_clock::now();
+    auto duration2 = chrono::duration_cast<chrono::microseconds>(endTime2 - endTime1);
+    cout << "Time taken for Extracting Rotations: " << duration2.count() << " microseconds" << endl;
+    
     // Output results
     for (int i = 0; i < rotations.size(); ++i) {
         cout << "Rotation matrix " << i + 1 << ":\n" << rotations[i] << endl;
